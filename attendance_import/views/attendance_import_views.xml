@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Attendance Import Tree View -->
+    <record id="view_attendance_import_tree" model="ir.ui.view">
+        <field name="name">attendance.import.tree</field>
+        <field name="model">attendance.import</field>
+        <field name="arch" type="xml">
+            <tree string="Attendance Imports" decoration-success="state == 'imported'" decoration-danger="state == 'failed'" decoration-info="state == 'analyzed'" decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="file_name"/>
+                <field name="create_date"/>
+                <field name="total_records"/>
+                <field name="successful_imports"/>
+                <field name="failed_imports"/>
+                <field name="state"/>
+                <field name="imported_by"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Attendance Import Form View -->
+    <record id="view_attendance_import_form" model="ir.ui.view">
+        <field name="name">attendance.import.form</field>
+        <field name="model">attendance.import</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Import">
+                <header>
+                    <button name="action_analyze_file" string="Analyze File" type="object" class="oe_highlight" states="draft"/>
+                    <button name="action_import_attendance" string="Import Attendance" type="object" class="oe_highlight" states="analyzed"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,analyzed,imported"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="excel_file" filename="file_name"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="create_date" readonly="1"/>
+                            <field name="imported_by" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="total_records" readonly="1"/>
+                            <field name="successful_imports" readonly="1"/>
+                            <field name="failed_imports" readonly="1"/>
+                            <field name="import_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attendance Lines" name="attendance_lines">
+                            <field name="attendance_line_ids" readonly="1">
+                                <tree>
+                                    <field name="employee_badge"/>
+                                    <field name="employee_id"/>
+                                    <field name="check_in"/>
+                                    <field name="check_out"/>
+                                    <field name="total_hours" sum="Total Hours"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Missing Employees" name="missing_employees" attrs="{'invisible': [('missing_employees', '=', False)]}">
+                            <field name="missing_employees" readonly="1"/>
+                        </page>
+                        <page string="Error Log" name="error_log" attrs="{'invisible': [('error_log', '=', False)]}">
+                            <field name="error_log" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Import Wizard Form View -->
+    <record id="view_import_attendance_wizard_form" model="ir.ui.view">
+        <field name="name">import.attendance.wizard.form</field>
+        <field name="model">import.attendance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Attendance">
+                <group>
+                    <field name="excel_file" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                    <field name="create_employees"/>
+                </group>
+                <footer>
+                    <button name="action_import" string="Import" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_attendance_import" model="ir.actions.act_window">
+        <field name="name">Attendance Imports</field>
+        <field name="res_model">attendance.import</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No attendance imports found
+            </p>
+            <p>
+                Import attendance records from Excel files.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_import_attendance_wizard" model="ir.actions.act_window">
+        <field name="name">Import Attendance</field>
+        <field name="res_model">import.attendance.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_attendance_import"
+        name="Attendance Import"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_attendance_import"
+        sequence="100"/>
+
+    <menuitem id="menu_import_attendance_wizard"
+        name="Import Attendance"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_import_attendance_wizard"
+        sequence="101"/>
+</odoo>
